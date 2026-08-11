@@ -2,6 +2,7 @@
 #define FLUTTER_IMPELLER_FFI_RENDERER_CONTEXT_H_
 
 #include "impeller_ffi/common.h"
+#include "impeller_ffi/renderer/capabilities.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -58,6 +59,10 @@ IMPELLER_FFI_EXPORT void impeller_ContextSharedMut_upgrade(
     impeller_ContextWeakMut* IMPELLER_FFI_NONNULL self);
 
 IMPELLER_FFI_EXPORT int impeller_ContextConst_get_backend_type(
+    impeller_ContextConst IMPELLER_FFI_NONNULL self);
+
+IMPELLER_FFI_EXPORT const impeller_CapabilitiesSharedConst*
+impeller_ContextConst_get_capabilities(
     impeller_ContextConst IMPELLER_FFI_NONNULL self);
 
 #ifdef __cplusplus

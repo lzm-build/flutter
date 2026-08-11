@@ -13,11 +13,13 @@ impeller_component("impeller_ffi") {
   public = [ "common.h" ]
   public += [
     "renderer/backend/vulkan/context_vk.h",
+    "renderer/capabilities.h",
     "renderer/context.h",
   ]
 
   sources = [
     "renderer/backend/vulkan/context_vk.cc",
+    "renderer/capabilities.cc",
     "renderer/context.cc",
   ]
 

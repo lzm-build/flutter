@@ -46,3 +46,9 @@ int impeller_ContextConst_get_backend_type(impeller_ContextConst self) {
   return static_cast<int>(
       reinterpret_cast<const impeller::Context*>(self)->GetBackendType());
 }
+
+const impeller_CapabilitiesSharedConst* impeller_ContextConst_get_capabilities(
+    impeller_ContextConst self) {
+  return reinterpret_cast<const impeller_CapabilitiesSharedConst*>(
+      &(reinterpret_cast<const impeller::Context*>(self)->GetCapabilities()));
+}
