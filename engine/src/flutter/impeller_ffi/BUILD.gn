@@ -1,0 +1,162 @@
+import("//flutter/build/zip_bundle.gni")
+import("//flutter/impeller/tools/impeller.gni")
+
+embed_blob("embedded_icu_data") {
+  symbol_name = "embedded_icu_data"
+  blob = "//flutter/third_party/icu/flutter/icudtl.dat"
+  hdr = "$target_gen_dir/embedded_icu_data.h"
+  cc = "$target_gen_dir/embedded_icu_data.cc"
+  deps = []
+}
+
+impeller_component("impeller_ffi") {
+  public = [ "common.h" ]
+  public += [
+    "renderer/backend/vulkan/context_vk.h",
+    "renderer/context.h",
+  ]
+
+  sources = [
+    "renderer/backend/vulkan/context_vk.cc",
+    "renderer/context.cc",
+  ]
+
+  public_deps = [
+    ":embedded_icu_data",
+    "//flutter/display_list",
+    "//flutter/fml",
+    "//flutter/impeller/base",
+    "//flutter/impeller/display_list",
+    "//flutter/impeller/entity",
+    "//flutter/impeller/renderer",
+    "//flutter/impeller/renderer/backend",
+    "//flutter/txt",
+  ]
+}
+
+impeller_component("impeller_ffi_shared_library") {
+  target_type = "shared_library"
+
+  output_name = "impeller_ffi"
+
+  deps = [ ":impeller_ffi" ]
+}
+
+impeller_component("impeller_ffi_static_library") {
+  target_type = "static_library"
+
+  complete_static_lib = true
+
+  output_name = "impeller_ffi"
+
+  deps = [ ":impeller_ffi" ]
+  if (use_flutter_cxx) {
+    deps += [ "//flutter/third_party/libcxx" ]
+  }
+}
+
+zip_bundle("impeller_ffi_sdk") {
+  if (is_mac) {
+    zip_out_dir = "darwin-${target_cpu}"
+  } else {
+    zip_out_dir = "${full_target_platform_name}"
+  }
+
+  output = "${zip_out_dir}/impeller_ffi_sdk.zip"
+
+  deps = [
+    ":impeller_ffi_shared_library",
+    ":impeller_ffi_static_library",
+  ]
+  if (is_linux || is_mac || is_win) {
+    deps += [ "//flutter/impeller/compiler:impellerc" ]
+  }
+
+  files = []
+
+  # files = [
+  #   {
+  #     source = "README.md"
+  #     destination = "README.md"
+  #   },
+  #   {
+  #     source = "impeller.h"
+  #     destination = "include/impeller.h"
+  #   },
+  #   {
+  #     source = "impeller.hpp"
+  #     destination = "include/impeller.hpp"
+  #   },
+  #   {
+  #     source = "example_gl.c"
+  #     destination = "examples/example_gl.c"
+  #   },
+  #   {
+  #     source = "example_vk.c"
+  #     destination = "examples/example_vk.c"
+  #   },
+  #   {
+  #     source = "example_mtl.m"
+  #     destination = "examples/example_mtl.m"
+  #   },
+  # ]
+
+  if (is_mac) {
+    files += [
+      {
+        source = "$root_build_dir/libimpeller_ffi.dylib"
+        destination = "lib/libimpeller_ffi.dylib"
+      },
+    ]
+  } else if (is_linux || is_android || is_qnx) {
+    files += [
+      {
+        source = "$root_build_dir/libimpeller_ffi.so"
+        destination = "lib/libimpeller_ffi.so"
+      },
+    ]
+  } else if (is_win) {
+    files += [
+      {
+        source = "$root_build_dir/impeller_ffi.dll"
+        destination = "lib/impeller_ffi.dll"
+      },
+      {
+        source = "$root_build_dir/impeller_ffi.dll.lib"
+        destination = "lib/impeller_ffi.dll.lib"
+      },
+    ]
+  }
+
+  if (is_mac || is_linux || is_android || is_qnx) {
+    files += [
+      {
+        source = "$root_build_dir/obj/flutter/impeller_ffi/libimpeller_ffi.a"
+        destination = "lib/libimpeller_ffi.a"
+      },
+    ]
+  } else if (is_win) {
+    files += [
+      {
+        source = "$root_build_dir/obj/flutter/impeller_ffi/impeller_ffi.lib"
+        destination = "lib/impeller_ffi.lib"
+      },
+    ]
+  }
+
+  if (is_mac || is_linux) {
+    files += [
+      {
+        source = "$root_build_dir/impellerc"
+        destination = "bin/impellerc"
+      },
+    ]
+  } else if (is_win) {
+    files += [
+      {
+        source = "$root_build_dir/impellerc.exe"
+        destination = "bin/impellerc.exe"
+      },
+    ]
+  }
+}
